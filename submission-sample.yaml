@@ -1,0 +1,30 @@
+# Coldline - Task 2.2
+# File: submission-sample.yaml
+# Component: Fictional completed answer sheet
+# Purpose: Show the accepted shape.
+# Interacts With: docs/contracts/submission.schema.json
+# Sprint/Task: Sprint 2 - Project 2 / Task 2.2
+# Concepts: Answer-sheet shape
+# Tools: YAML
+
+# Complete submission.yaml from the evidence sources named beside each answer group.
+# Keep the supplied keys; replace empty strings using each field's stated type.
+# Empty values and placeholder text fail verification.
+# Use submission-sample.yaml for format only; do not copy its fictional values.
+# Do not include secrets, personal data, or local absolute paths.
+# This fictional sample is not a result to submit; an exact copy is rejected.
+
+answers:
+  # Task 2.2 — Step 1: Define service boundaries that reduce coupling
+  # Inspect coupled workflow and select boundary.
+  # Select one responsibility in src/api/retrieval_workflow.py, then implement
+  # its interface and wire the service in Steps 2–3. Record the choice you built.
+  # Sources: docs/student/task-2-2-contract.md and src/domain/services.py.
+  #
+  # Boundary options (use exact strings):
+  # - retrieval_orchestration: Build the retrieval request, invoke the Retriever
+  #   port, and select candidates to send to the next stage.
+  # - context_assembly: Apply the token budget, format the prompt, and build citations.
+  #
+  # Choose one boundary above; it must match the service your application uses.
+  selected_boundary: "context_assembly"

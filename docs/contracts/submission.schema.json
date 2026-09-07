@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Coldline Task 2.2 public answer contract. The single answer names which responsibility was extracted; the automated checks then verify that the recorded responsibility is the one actually implemented, wired, and invoked.",
+  "title": "Coldline Task 2.2 answers",
+  "description": "The extracted internal service boundary, recorded as one enumerated value.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["answers"],
+  "properties": {
+    "answers": {
+      "description": "The only top-level answer mapping accepted by the public verifier.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["selected_boundary"],
+      "properties": {
+        "selected_boundary": {
+          "description": "Which of the two supported responsibilities was extracted behind an internal service boundary.",
+          "enum": ["retrieval_orchestration", "context_assembly"]
+        }
+      }
+    }
+  }
+}
