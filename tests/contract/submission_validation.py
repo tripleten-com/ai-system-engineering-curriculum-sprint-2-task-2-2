@@ -165,6 +165,9 @@ def validate_submission(
         if isinstance(value, str) and (not value.strip() or "Replace this line" in value):
             raise SubmissionError(f"answers.{field} is incomplete")
 
+    if sample_path is not None and submission == _load_one_document(sample_path):
+        raise SubmissionError("submission must not copy the fictional sample answers")
+
     schema = json.loads(schema_path.read_text(encoding="utf-8"))
     errors = sorted(
         Draft202012Validator(schema).iter_errors(submission), key=lambda error: list(error.path)
@@ -173,9 +176,6 @@ def validate_submission(
         error = errors[0]
         location = ".".join(str(part) for part in error.absolute_path) or "submission"
         raise SubmissionError(f"{location}: {error.message}")
-
-    if sample_path is not None and submission == _load_one_document(sample_path):
-        raise SubmissionError("submission must not copy the fictional sample answers")
 
 
 def validate_baseline(baseline_path: Path) -> None:
