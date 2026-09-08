@@ -13,6 +13,7 @@ Tools:             Python 3.12, pytest, AST
 
 import ast
 import importlib
+import importlib.util
 from pathlib import Path
 from typing import Any
 
@@ -129,22 +130,25 @@ def _imported_modules(path: Path) -> set[str]:
         if isinstance(node, ast.Import):
             names.update(alias.name for alias in node.names)
         elif isinstance(node, ast.ImportFrom):
+            module = node.module or ""
             if node.level:
-                # A relative import inside api.extensions can only reach this
-                # package, which is allowed; record it as such.
-                names.add("api.extensions")
-            elif node.module:
-                names.add(node.module)
+                package = ".".join(path.parent.relative_to(TASK_ROOT / "src").parts)
+                module = importlib.util.resolve_name("." * node.level + module, package)
+            if node.module or any(alias.name == "*" for alias in node.names):
+                names.add(module)
+            names.update(f"{module}.{alias.name}" for alias in node.names if alias.name != "*")
     return names
 
 
 def _extension_modules() -> list[Path]:
-    """Return the student extension modules, excluding the package marker."""
-    return [
-        path
-        for path in sorted(EXTENSIONS.rglob("*.py"))
-        if path.name != "__init__.py" and "__pycache__" not in path.parts
-    ]
+    """Return extension source modules, including executable package initializers."""
+    return [path for path in sorted(EXTENSIONS.rglob("*.py")) if "__pycache__" not in path.parts]
+
+
+def _module_name(path: Path) -> str:
+    """Identify a module or package from its path under the source root."""
+    parts = path.with_suffix("").relative_to(TASK_ROOT / "src").parts
+    return ".".join(parts[:-1] if parts[-1] == "__init__" else parts)
 
 
 def test_extracted_service_has_no_forbidden_dependency() -> None:
@@ -162,13 +166,31 @@ def test_extracted_service_has_no_import_cycle() -> None:
     """The dependency must point one way: the caller depends on the service."""
     workflow_imports = _imports(TASK_ROOT / "src/api/retrieval_workflow.py")
     assert "domain" in workflow_imports
+    modules: dict[str, set[str]] = {}
     for path in _extension_modules():
         imported = _imported_modules(path)
+        modules[_module_name(path)] = imported
         assert CALLER_MODULE not in imported, (
             f"{path.name} imports {CALLER_MODULE}, its own caller, which makes the "
             "dependency circular"
         )
         assert not any(name.startswith(f"{CALLER_MODULE}.") for name in imported), path.name
+
+    # An initializer's absolute child import also names its own package. That
+    # package identity is not an extra dependency; keep the actual child edge.
+    graph = {module: (imported & modules.keys()) - {module} for module, imported in modules.items()}
+    visited: set[str] = set()
+
+    def visit(module: str, chain: tuple[str, ...]) -> None:
+        assert module not in chain, f"extension import cycle: {' -> '.join((*chain, module))}"
+        if module in visited:
+            return
+        for dependency in sorted(graph[module]):
+            visit(dependency, (*chain, module))
+        visited.add(module)
+
+    for module in sorted(graph):
+        visit(module, ())
 
 
 async def test_extracted_service_runs_against_supplied_doubles() -> None:
