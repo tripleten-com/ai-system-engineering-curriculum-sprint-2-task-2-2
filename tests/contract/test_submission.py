@@ -56,7 +56,9 @@ def test_both_supported_choices_pass_public_validation(tmp_path: Path, choice: s
 
 def test_blank_template_fails_with_field_address(tmp_path: Path) -> None:
     """An untouched answer sheet must identify the incomplete field."""
-    root = _task_root(tmp_path, (ROOT / "submission.yaml").read_text(encoding="utf-8"))
+    root = _task_root(
+        tmp_path, (ROOT / "tests/fixtures/submission-template.yaml").read_text(encoding="utf-8")
+    )
 
     with pytest.raises(SubmissionError, match="answers.selected_boundary"):
         validate_submission(root / "submission.yaml", SCHEMA)
@@ -122,7 +124,9 @@ def test_public_entrypoint_reports_an_incomplete_answer_sheet(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     """Catch a verifier entrypoint that skips the real submission contract."""
-    root = _task_root(tmp_path, (ROOT / "submission.yaml").read_text(encoding="utf-8"))
+    root = _task_root(
+        tmp_path, (ROOT / "tests/fixtures/submission-template.yaml").read_text(encoding="utf-8")
+    )
 
     assert main(root, changed_paths=[]) == 1
     assert "answers.selected_boundary is incomplete" in capsys.readouterr().err
