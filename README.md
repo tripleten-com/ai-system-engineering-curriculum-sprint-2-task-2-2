@@ -66,7 +66,9 @@ poe verify
 |---|---|
 | `poe ingest` | Run the supplied baseline corpus ingestion inside the API container |
 | `poe baseline` | Run every published query and print the baseline evaluation report |
-| `poe boundary` | Run this Task's service-boundary checks |
+| `poe boundary-service` | Check dependency direction and behavior before wiring |
+| `poe boundary-integration` | Check substitution and application wiring |
+| `poe boundary` | Run both groups with named results |
 | `poe student-tests` | Run your own tests under `tests/student/` |
 | `poe unit` | Run fast isolated behavior tests |
 | `poe contract` | Check interfaces, boundaries, submissions, and repository structure |
@@ -90,6 +92,14 @@ The service-boundary checks in `poe boundary` need no database and no network: t
 extracted service against the supplied doubles in `tests/doubles/`. The regression half of the
 contract — that retrieval still answers as it did before your extraction — runs inside
 `poe smoke` and `poe e2e` against the started stack.
+
+Use `poe boundary-service` after recording `answers.selected_boundary` and implementing the
+selected class: it checks dependency direction, independent execution, and the behavior limits.
+The factory may still return `None` at this stage. After updating the matching factory, run
+`poe boundary-integration` for substitution and wiring. Both commands use supplied doubles and
+need only the bootstrapped Python environment, with no running stack. `poe boundary` runs both
+groups and names each result. A failure in one group does not suppress the other group's results.
+Run `poe verify` after `poe start`, `poe ready`, and `poe ingest` for the complete public gate.
 
 ## Folder map
 

@@ -62,6 +62,8 @@ testpaths = ["tests"]
 pythonpath = ["."]
 asyncio_mode = "auto"
 markers = [
+  "boundary_service: dependency direction and independent service behavior",
+  "boundary_integration: substitution and application wiring",
   "runtime: requires the running Docker Compose stack",
   "assessed: checks student work this Task assesses, so a fresh starter is expected to fail it",
   "submission_boundary: asserts a student submission stays inside this Task's editable paths",
@@ -110,7 +112,9 @@ smoke = "pytest tests/smoke -m runtime"
 e2e = "pytest tests/e2e -m runtime"
 telemetry-repair = "pytest tests/contract/test_telemetry_repair.py -m runtime"
 retrieval-runtime = "pytest tests/contract/test_retrieval_runtime.py -m runtime"
-boundary = "pytest tests/contract/test_service_boundary.py"
+boundary-service = "pytest tests/contract/test_service_boundary.py -m boundary_service -v"
+boundary-integration = "pytest tests/contract/test_service_boundary.py -m boundary_integration -v"
+boundary = "pytest tests/contract/test_service_boundary.py -v"
 student-tests = "pytest tests/student"
 test = ["unit", "contract"]
 preflight = "python infra/scripts/preflight.py"
