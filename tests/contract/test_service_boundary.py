@@ -151,6 +151,7 @@ def _module_name(path: Path) -> str:
     return ".".join(parts[:-1] if parts[-1] == "__init__" else parts)
 
 
+@pytest.mark.boundary_service
 def test_extracted_service_has_no_forbidden_dependency() -> None:
     """An extracted service must not reach its caller or concrete infrastructure."""
     student_class()
@@ -162,6 +163,7 @@ def test_extracted_service_has_no_forbidden_dependency() -> None:
     assert violations == [], violations
 
 
+@pytest.mark.boundary_service
 def test_extracted_service_has_no_import_cycle() -> None:
     """The dependency must point one way: the caller depends on the service."""
     workflow_imports = _imports(TASK_ROOT / "src/api/retrieval_workflow.py")
@@ -193,6 +195,7 @@ def test_extracted_service_has_no_import_cycle() -> None:
         visit(module, ())
 
 
+@pytest.mark.boundary_service
 async def test_extracted_service_runs_against_supplied_doubles() -> None:
     """The service must execute in isolation, with no database and no network."""
     choice = selected_boundary()
@@ -241,6 +244,7 @@ async def test_extracted_service_runs_against_supplied_doubles() -> None:
         assert "\n\n" in context.prompt_context
 
 
+@pytest.mark.boundary_service
 async def test_extracted_service_respects_the_token_budget_boundary() -> None:
     """Assembly must trim rather than overflow, and orchestration must honour the cap."""
     choice = selected_boundary()
@@ -258,6 +262,7 @@ async def test_extracted_service_respects_the_token_budget_boundary() -> None:
         assert len(orchestrated.selected) == 1
 
 
+@pytest.mark.boundary_integration
 async def test_substituting_the_service_changes_behavior_without_caller_edits() -> None:
     """A different implementation of the same contract must change the workflow output."""
     choice = selected_boundary()
@@ -300,6 +305,7 @@ async def test_substituting_the_service_changes_behavior_without_caller_edits() 
     )
 
 
+@pytest.mark.boundary_integration
 def test_application_wiring_uses_the_extracted_service() -> None:
     """The application must be wired to the student's service, not to the coupled code."""
     choice = selected_boundary()
@@ -340,6 +346,7 @@ def test_application_wiring_uses_the_extracted_service() -> None:
     )
 
 
+@pytest.mark.boundary_integration
 async def test_wired_service_is_the_one_the_workflow_invokes() -> None:
     """The composed workflow must expose the wired service, not a second instance."""
     choice = selected_boundary()

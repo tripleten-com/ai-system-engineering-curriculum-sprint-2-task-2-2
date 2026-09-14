@@ -84,7 +84,13 @@ application-integration check: the running application would still be executing 
 | application integration | the wiring factory returns your class, and the composed workflow exposes it |
 | regression | the retrieval API still answers as it did before the extraction |
 
-Run them with `poe boundary`, or the whole public gate with `poe verify`.
+Use `poe boundary-service` after recording `answers.selected_boundary` and implementing the
+selected class: it checks dependency direction, independent execution, and the behavior limits.
+The factory may still return `None` at this stage. After updating the matching factory, run
+`poe boundary-integration` for substitution and wiring. Both commands use supplied doubles and
+need only the bootstrapped Python environment, with no running stack. `poe boundary` runs both
+groups and names each result. A failure in one group does not suppress the other group's results.
+Run `poe verify` after `poe start`, `poe ready`, and `poe ingest` for the complete public gate.
 
 ## Permitted paths
 
