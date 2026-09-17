@@ -85,13 +85,16 @@ poe verify
 `poe ingest` is idempotent: running it twice produces the same rows, the same counts, and the same
 corpus digest. `poe reset` removes the database volume, so run `poe ingest` again after a reset.
 
-For Task 2.2, `poe verify` runs readiness, smoke tests, the end-to-end exception workflow, the
-answer-sheet checks, the service-boundary checks, and your own tests under `tests/student/`.
+For Task 2.2, `poe verify` starts the stack and ingests the corpus, then runs readiness, smoke
+tests, the end-to-end exception workflow, the baseline retrieval evaluation, the answer-sheet
+checks, the service-boundary checks, and your own tests under `tests/student/`.
 
 The service-boundary checks in `poe boundary` need no database and no network: they run your
 extracted service against the supplied doubles in `tests/doubles/`. The regression half of the
-contract — that retrieval still answers as it did before your extraction — runs inside
-`poe smoke` and `poe e2e` against the started stack.
+contract — that the running application still answers retrieval queries with your service on the
+request path — runs inside `poe baseline`, which queries the started stack over HTTP. `poe smoke`
+checks the platform itself and `poe e2e` runs the exception workflow; neither one issues a
+retrieval query.
 
 Use `poe boundary-service` after recording `answers.selected_boundary` and implementing the
 selected class: it checks dependency direction, independent execution, and the behavior limits.
@@ -99,7 +102,8 @@ The factory may still return `None` at this stage. After updating the matching f
 `poe boundary-integration` for substitution and wiring. Both commands use supplied doubles and
 need only the bootstrapped Python environment, with no running stack. `poe boundary` runs both
 groups and names each result. A failure in one group does not suppress the other group's results.
-Run `poe verify` after `poe start`, `poe ready`, and `poe ingest` for the complete public gate.
+`poe verify` performs `poe start`, `poe ready`, and `poe ingest` itself, so run it for the
+complete public gate whether or not the stack is already up.
 
 ## Folder map
 
