@@ -128,8 +128,21 @@ structure = "python -m tests.contract.authoring"
 compose-config = "docker compose --profile observability --profile localstack config --quiet"
 # `start` first: it is `up --build --wait`, so the containers the smoke and
 # end-to-end checks talk to are built from this checkout rather than from a
-# previous one.
-verify = ["start", "ready", "smoke", "e2e", "answers", "boundary", "student-tests"]
+# previous one. `ingest` follows, because the later checks read a corpus that a
+# fresh volume does not have. `baseline` is the regression half of this Task's
+# contract: it is the only step that reaches the running application over HTTP,
+# so it is where a wired extraction that no longer answers queries is caught.
+verify = [
+  "start",
+  "ready",
+  "ingest",
+  "smoke",
+  "e2e",
+  "baseline",
+  "answers",
+  "boundary",
+  "student-tests",
+]
 author-verify = [
   "format-check",
   "lint",
